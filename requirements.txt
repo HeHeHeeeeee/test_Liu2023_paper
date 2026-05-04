@@ -1,0 +1,8 @@
+numpy>=1.24
+scipy>=1.10
+tqdm>=4.65
+
+# Required for Task C (H2 -> H3 quantum chemistry Hamiltonians).
+openfermion>=1.6
+openfermionpyscf>=0.5
+pyscf>=2.4
