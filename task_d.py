@@ -15,6 +15,10 @@ def settings_from_env() -> ExperimentSettings:
         target_successes=int(os.getenv("TARGET_SUCCESSES", "100")),
         max_iter_base=int(os.getenv("MAX_ITER_BASE", "500")),
         max_iter_target=int(os.getenv("MAX_ITER_TARGET", "500")),
+        max_trials_base=int(os.getenv("MAX_TRIALS_BASE", "0")),
+        max_trials_target=int(os.getenv("MAX_TRIALS_TARGET", "0")),
+        workers=int(os.getenv("WORKERS", str(max(1, (os.cpu_count() or 2) - 2)))),
+        record_history=os.getenv("RECORD_HISTORY", "1") != "0",
         seed=int(os.getenv("SEED")) if os.getenv("SEED") else None,
     )
 

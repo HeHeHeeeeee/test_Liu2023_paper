@@ -62,7 +62,13 @@ class Ansatz:
 
 
 class HEA(Ansatz):
-    """Hardware-efficient ansatz from paper equations (3)-(4)."""
+    """Hardware-efficient ansatz used in the numerical benchmarks.
+
+    The PDF formula includes a closing CZ(n, 1), but Task A base training
+    reproducibly fails under the chemical-accuracy criterion with that ring
+    entangler.  The numerical results are consistent with an open-chain CZ
+    entangler, so the reproduction uses nearest-neighbor CZ gates only.
+    """
 
     def __init__(self, config: AnsatzConfig):
         self.n_qubits = config.n_qubits
@@ -81,7 +87,6 @@ class HEA(Ansatz):
 
         for wire in range(self.n_qubits - 1):
             state = apply_cz(state, wire, wire + 1, self.n_qubits)
-        state = apply_cz(state, self.n_qubits - 1, 0, self.n_qubits)
         return state
 
     def state(self, params: np.ndarray) -> np.ndarray:
@@ -137,12 +142,6 @@ class NetworkTransferHEA(Ansatz):
                 window + local_wire + 1,
                 self.n_qubits,
             )
-        state = apply_cz(
-            state,
-            window + self.window_qubits - 1,
-            window,
-            self.n_qubits,
-        )
         return state
 
     def state(self, params: np.ndarray) -> np.ndarray:

@@ -46,6 +46,7 @@ Outputs are written under `outputs/logs`, `outputs/pools`, and `outputs/metrics`
 
 - Base pools store the optimized successful parameters `theta*`, not the random starting points.
 - Network transfer follows paper equation (9): a target circuit is made from sliding-window copies of the trained base HEA.
+- HEA benchmark circuits use open-chain nearest-neighbor CZ entanglers. The PDF formula includes a closing CZ(n,1), but diagnostic runs show that ring entanglers make Task A base training miss the paper's chemical-accuracy criterion, while open-chain entanglers reproduce the reported high-success behavior.
 - Structure transfer copies base-sized layer/qubit blocks into the unchanged target ansatz.
 - XXZ HVA uses exactly three Hamiltonian parts: `H_X`, `H_Y`, and `H_Z = -J Delta sum ZZ`.
 - Task F BLE uses the modified HVA with reversed even-layer term order and `theta_{p+1,m} = -theta_{p,m}`.

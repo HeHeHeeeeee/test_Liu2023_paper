@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -17,6 +18,7 @@ class VQAResult:
     params: np.ndarray
     n_iter: int
     init_gradient_norm: float
+    history: list[dict[str, Any]]
 
 
 def normalized_gradient_norm(gradient: np.ndarray) -> float:
@@ -31,6 +33,7 @@ def optimize_vqa(
     max_iter: int = 500,
     threshold: float = 1.6e-3,
     compute_init_gradient: bool = True,
+    record_history: bool = True,
 ) -> VQAResult:
     """Run the paper's BFGS-style VQA optimization from one initialization."""
 
@@ -47,14 +50,40 @@ def optimize_vqa(
     if compute_init_gradient:
         init_g = normalized_gradient_norm(ansatz.gradient(init_params, hamiltonian))
 
+    history: list[dict[str, Any]] = []
+    if record_history:
+        init_cost = ansatz.cost_function(init_params, hamiltonian)
+        history.append(
+            {
+                "iteration": 0,
+                "cost": init_cost,
+                "error": abs(init_cost - exact_energy),
+                "params": init_params.tolist(),
+            }
+        )
+
     def objective(x: np.ndarray) -> tuple[float, np.ndarray]:
         return ansatz.cost_and_gradient(x, hamiltonian)
+
+    def callback(xk: np.ndarray) -> None:
+        if not record_history:
+            return
+        cost = ansatz.cost_function(xk, hamiltonian)
+        history.append(
+            {
+                "iteration": len(history),
+                "cost": cost,
+                "error": abs(cost - exact_energy),
+                "params": np.asarray(xk, dtype=float).tolist(),
+            }
+        )
 
     result = minimize(
         fun=objective,
         x0=init_params,
         method="BFGS",
         jac=True,
+        callback=callback,
         options={"maxiter": max_iter, "gtol": 1.0e-7, "disp": False},
     )
 
@@ -67,6 +96,7 @@ def optimize_vqa(
         params=np.asarray(result.x, dtype=float),
         n_iter=int(result.nit),
         init_gradient_norm=init_g,
+        history=history,
     )
 
 
